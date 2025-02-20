@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SWRJ.HAN PORTALS PROJECT</title>
+  <!-- PicoCSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+  <!-- Шрифты -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Monoton&display=swap" rel="stylesheet" />
+
+  <style>
+    /* === Стили фонового видео === */
+    #video-bg {
+      position: fixed; 
+      top: 0; 
+      left: 0;
+      width: 100vw; 
+      height: 100vh;
+      object-fit: cover;
+      z-index: -2;
+    }
+    #video-overlay {
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100vw; 
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+
+    /* === Прелоадер === */
+    #loading {
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      z-index: 10000;
+    }
+
+    /* === Предупреждение об эпилепсии === */
+    #epilepsy-banner {
+      position: fixed; 
+      top: 0; 
+      left: 0;
+      width: 100%; 
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      color: white; 
+      z-index: 9999;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      text-align: center; 
+      gap: 2rem;
+    }
+    #epilepsy-banner h1 {
+      font-family: 'Monoton', cursive; 
+      font-size: 2.5rem; 
+      color: #ffd700;
+      text-shadow: 0 0 10px #ffd700, 0 0 20px #ff69b4;
+    }
+    #epilepsy-banner p {
+      font-size: 1.2rem; 
+      max-width: 600px;
+    }
+    #epilepsy-banner .button-group {
+      display: flex; 
+      gap: 1rem; 
+      align-items: center;
+    }
+    #epilepsy-banner button {
+      padding: 1rem 2rem; 
+      font-size: 1.2rem; 
+      cursor: pointer; 
+      border: none; 
+      border-radius: 5px;
+      transition: transform 0.3s;
+    }
+    #epilepsy-banner button:hover { transform: scale(1.1); }
+    .accept { background: #28a745; color: white; }
+    .close { background: #dc3545; color: white; }
+
+    /* === Аудио-чекбокс === */
+    #audio-container {
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      font-size: 1.2rem; 
+      cursor: pointer; 
+      user-select: none;
+    }
+    #audio-container input {
+      transform: scale(1.5); 
+      cursor: pointer;
+    }
+
+    /* === Навигация === */
+    nav {
+      background: url('https://i.imgur.com/nFUmPWj.jpeg') no-repeat center/cover;
+      border-radius: 10px; 
+      margin: 1rem; 
+      padding: 1rem;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    nav ul {
+      display: flex; 
+      gap: 1rem; 
+      list-style: none;
+    }
+    nav ul li a {
+      font-size: 1.5rem; 
+      text-decoration: none; 
+      color: #ffd700; 
+      transition: transform 0.3s;
+    }
+    nav ul li a:hover {
+      transform: scale(1.2);
+    }
+    nav ul:first-child strong {
+      font-family: 'Monoton', cursive; 
+      font-size: 1.5rem; 
+      color: #ffd700;
+      animation: pulse 2s infinite;
+      text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 20px #ffd700;
+    }
+    @keyframes pulse {
+      0%, 100% {
+        text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 20px #ffd700;
+      }
+      50% {
+        text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 40px #ffd700;
+      }
+    }
+
+    /* === Заголовки === */
+    h1 {
+      font-family: 'Monoton', cursive; 
+      color: #ff69b4;
+      text-align: center; 
+      font-size: 3rem; 
+      margin-bottom: 1rem;
+    }
+    h2 {
+      font-family: 'Orbitron', sans-serif; 
+      color: #00ffff;
+    }
+
+    /* === Галерея порталов === */
+    .grid {
+      display: grid; 
+      gap: 1.5rem;
+      grid-template-columns: repeat(2, 1fr);
+      margin-top: 2rem;
+    }
+    .grid figure {
+      border: none; 
+      border-radius: 10px; 
+      overflow: hidden;
+      background: rgba(0,0,0,0.8); 
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(255,0,255,0.7);
+      text-align: center;
+    }
+    .grid img {
+      width: 100%; 
+      height: auto; 
+      display: block;
+    }
+    .portal-4 {
+      background: url('https://i.imgur.com/TeeSBmy.jpeg') no-repeat center/cover;
+      animation: pulsePortal 3s infinite; 
+      position: relative;
+    }
+    @keyframes pulsePortal {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .portal-4 figcaption {
+      position: absolute; 
+      bottom: 10%; 
+      left: 50%; 
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6); 
+      padding: 0.5rem 1rem; 
+      border-radius: 5px;
+      font-family: 'Monoton', cursive; 
+      font-size: 1rem; 
+      color: #ffd700;
+    }
+
+    /* === Дополнительные стили === */
+    .glass-effect {
+      backdrop-filter: blur(10px); 
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .neon-text { animation: neonPulse 2s infinite; }
+    @keyframes neonPulse {
+      0%, 100% { text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff; }
+      50% { text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff; }
+    }
+    .hover-scale {
+      transition: transform 0.3s;
+    }
+    .hover-scale:hover {
+      transform: scale(1.05);
+    }
+    .gradient-border {
+      position: relative;
+    }
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      top: -8px; 
+      left: -8px; 
+      right: -8px; 
+      bottom: -8px;
+      background: linear-gradient(45deg, rgba(255,0,255,0.3), rgba(0,255,255,0.3));
+      z-index: -1; 
+      border-radius: 12px;
+    }
+
+    /* === Секция Career === */
+    #career-section {
+      background: url('https://i.imgur.com/BwHGvZD.jpeg') no-repeat center/cover;
+      min-height: 80vh; 
+      padding: 4rem; 
+      border-radius: 10px; 
+      text-align: center;
+      position: relative; 
+      overflow: hidden;
+    }
+    #career-section h2 {
+      font-size: 3.5rem; 
+      color: #ffd700; 
+      text-shadow: 0 0 10px #ffd700; 
+      margin-bottom: 2rem;
+    }
+    #career-section p:nth-child(2) {
+      font-size: 2.8rem; 
+      color: #e0e0e0; 
+      margin: 1.5rem 0;
+    }
+    #career-section p:nth-child(3) {
+      font-size: 2.2rem; 
+      color: #00ffff; 
+      margin: 1rem 0;
+    }
+    #career-section p:nth-child(4) {
+      font-size: 1.8rem; 
+      color: #ff69b4;
+    }
+
+    /* === Футер === */
+    footer {
+      text-align: center; 
+      position: relative;
+    }
+    footer button {
+      background: url('https://i.imgur.com/hWO2g5i.jpeg') no-repeat center/cover;
+      color: white; 
+      border: none; 
+      padding: 24px; 
+      font-size: 1.2em; 
+      cursor: pointer; 
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255,105,180,0.9); 
+      transition: transform 0.3s;
+      margin: 2rem auto;
+    }
+    footer button:hover {
+      transform: scale(1.05);
+    }
+
+    .additional-content {
+      padding: 2rem; 
+      margin: 2rem auto; 
+      text-align: center;
+    }
+    .cyber-grid {
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 1rem; 
+      margin-top: 2rem;
+    }
+    .cyber-box {
+      background: rgba(0,255,255,0.1); 
+      padding: 1rem;
+      border: 1px solid #00ffff; 
+      color: #00ffff; 
+      cursor: pointer;
+    }
+    .cyber-finale {
+      margin: 2rem auto;
+    }
+    .mini-nav {
+      width: 50%; 
+      margin: 0 auto; 
+      padding: 1rem;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    .tech-tag {
+      color: #ffd700; 
+      font-family: 'Monoton', cursive;
+      text-shadow: 0 0 10px #ffd700;
+    }
+    .cyber-elements { color: #00ffff; }
+    .matrix-code {
+      font-family: 'Orbitron', sans-serif; 
+      margin: 0 0.5rem;
+    }
+
+    /* === Кнопка "скролл вверх" === */
+    #scroll-top {
+      position: fixed; 
+      bottom: 20px; 
+      right: 20px;
+      background: #ffd700; 
+      border: none; 
+      border-radius: 50%;
+      width: 50px; 
+      height: 50px; 
+      display: none; 
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255,215,0,0.7);
+    }
+
+    /* === Анимация появления (fade-in) === */
+    .fade-in {
+      opacity: 0; 
+      transform: translateY(20px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    .fade-in.visible {
+      opacity: 1; 
+      transform: translateY(0);
+    }
+
+    /* === Модальное окно (для наших описаний порталов) === */
+    #modal-bg {
+      position: fixed; 
+      top: 0; 
+      left: 0;
+      width: 100vw; 
+      height: 100vh;
+      background: rgba(0,0,0,0.5); 
+      backdrop-filter: blur(5px);
+      display: none; 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 30000;
+    }
+    #modal {
+      background: #fff; 
+      color: #000; 
+      padding: 2rem; 
+      border-radius: 10px; 
+      max-width: 90%;
+      z-index: 30001; 
+    }
+    #modal button { margin-top: 1rem; }
+
+    /* === Кастомное окно MetaMask === */
+    #metamaskModal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0; 
+      left: 0;
+      width: 100vw; 
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center; 
+      align-items: center;
+    }
+    #metamaskModalContent {
+      background: #fff; 
+      padding: 2rem; 
+      border-radius: 12px; 
+      text-align: center; 
+      max-width: 400px; 
+      position: relative;
+    }
+    #closeModalBtn {
+      position: absolute; 
+      top: 1rem; 
+      right: 1rem;
+      background: none; 
+      border: none; 
+      font-size: 1.2rem; 
+      cursor: pointer;
+    }
+    #metamaskIcon {
+      width: 100px; 
+      height: 100px; 
+      margin-bottom: 1rem;
+    }
+    #connectMetaMaskBtn {
+      font-size: 1.2rem;
+      padding: 1rem 2rem;
+      background-color: #f6851b;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    #connectMetaMaskBtn:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Прелоадер -->
+  <div id="loading">
+    <div style="color:#ffd700; font-family:'Monoton', cursive;">Loading...</div>
+  </div>
+
+  <!-- Фоновое видео -->
+  <video id="video-bg" onloadeddata="document.getElementById('loading').style.display='none'" src="https://i.imgur.com/ZrUwcPR.mp4" muted autoplay loop></video>
+  <div id="video-overlay"></div>
+
+  <!-- Предупреждение об эпилепсии -->
+  <div id="epilepsy-banner">
+    <h1>Warning: Epilepsy Risk</h1>
+    <p>
+      This site contains flashing images and animations that may trigger seizures for people with photosensitive epilepsy.
+      Please proceed with caution.
+    </p>
+    <div class="button-group">
+      <label id="audio-container">
+        <input type="checkbox" id="audio-checkbox" />
+        Включить звук
+      </label>
+      <button class="accept" onclick="acceptWarning()">Proceed</button>
+      <button class="close" onclick="closeTab()">Exit</button>
+    </div>
+  </div>
+
+  <!-- Навигация -->
+  <nav>
+    <ul>
+      <li><strong>SWRJ.HAN PORTALS PROJECT</strong></li>
+    </ul>
+    <ul>
+      <li><a href="#main">⚝</a></li>
+      <li><a href="#gallery">⧉</a></li>
+      <li><a href="#career-section">⚙</a></li>
+    </ul>
+  </nav>
+
+  <!-- Основной контент -->
+  <main>
+    <section id="main">
+      <h1>SWRJ.HAN PORTALS PROJECT</h1>
+      <section>
+        <hgroup>
+          <h2>Explore the beauty of dark cyber minimalism</h2>
+        </hgroup>
+        <p>Discover a series of stunning NFT portals—a unique gateway to the cosmos.</p>
+      </section>
+
+      <!-- Галерея порталов -->
+      <section id="gallery">
+        <h2>Gallery</h2>
+        <div class="grid">
+          <figure onclick="openModal(portal1)">
+            <img src="https://i.imgur.com/pF9I3M4.jpeg" alt="Portal 1" />
+            <figcaption>Portal 1</figcaption>
+          </figure>
+          <figure onclick="openModal(portal2)">
+            <img src="https://i.imgur.com/h6ZpwRR.jpeg" alt="Portal 2" />
+            <figcaption>Portal 2</figcaption>
+          </figure>
+          <figure onclick="openModal(portal3)">
+            <img src="https://cdn.midjourney.com/34c35bb4-4f23-4ad2-a2f3-b45b88a25dc6/0_0.jpeg" alt="Portal 3" />
+            <figcaption>Portal 3</figcaption>
+          </figure>
+          <figure class="portal-4" onclick="openModal(portal1)">
+            <figcaption>Open dimensions door</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Секция Career -->
+      <section id="career-section" class="glass-effect gradient-border">
+        <h2 class="neon-text">Career Opportunities</h2>
+        <p class="hover-scale">Join Our Digital Universe</p>
+        <p class="hover-scale">Shape The Future</p>
+        <p class="hover-scale">Become Part of Innovation</p>
+      </section>
+    </section>
+  </main>
+
+  <!-- Футер с кнопкой (наша кастомная) -->
+  <footer>
+    <!-- Кнопка, открывающая КАСТОМНОЕ окно MetaMask -->
+    <button onclick="showMetaMaskPopup()">
+      <span class="connect">Open Our MetaMask Window</span>
+    </button>
+  </footer>
+
+  <section class="additional-content glass-effect gradient-border">
+    <h2 class="neon-text">Digital Evolution</h2>
+    <p>Pushing boundaries of digital art</p>
+    <div class="cyber-grid">
+      <div class="cyber-box" onclick="openModal(portal1)">Neural Networks</div>
+      <div class="cyber-box" onclick="openModal(portal2)">Blockchain Future</div>
+      <div class="cyber-box" onclick="openModal(portal3)">Quantum Computing</div>
+    </div>
+  </section>
+
+  <section class="cyber-finale">
+    <div class="mini-nav glass-effect">
+      <div class="tech-tag">swrj_han_tech</div>
+      <div class="cyber-elements">
+        <span>⟨⟨⟨</span>
+        <span class="matrix-code">01001</span>
+        <span>⟩⟩⟩</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Кнопка "Скролл вверх" -->
+  <button id="scroll-top" onclick="scrollToTop()">↑</button>
+
+  <!-- Модальное окно (для описаний порталов) -->
+  <div id="modal-bg" onclick="closeModal()">
+    <div id="modal" onclick="event.stopPropagation()">
+      <div id="modal-content"></div>
+      <button onclick="closeModal()">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- Наше кастомное окно MetaMask -->
+  <div id="metamaskModal">
+    <div id="metamaskModalContent">
+      <button id="closeModalBtn" onclick="hideMetaMaskPopup()">×</button>
+      <img id="metamaskIcon"
+           src="https://cdn.iconscout.com/icon/free/png-256/free-metamask-logo-icon-download-in-svg-png-gif-file-formats--technology-brand-social-media-company-logos-pack-icons-6297246.png"
+           alt="MetaMask Icon">
+      <h2>Connect to MetaMask</h2>
+      <p>Click below to open the real MetaMask authorization window.</p>
+      <button id="connectMetaMaskBtn" onclick="connectMetaMask()">Connect</button>
+    </div>
+  </div>
+
+  <!-- Подключаем ethers.js -->
+  <script src="https://cdn.ethers.io/scripts/ethers-5.2.umd.min.js"></script>
+
+  <!-- Аудио (опционально) -->
+  <audio id="background-music" src="https://www.example.com/your-audio-file.mp3" loop></audio>
+
+  <script>
+    // === Предупреждение об эпилепсии ===
+    function acceptWarning() {
+      document.getElementById('epilepsy-banner').style.display = 'none';
+      const music = document.getElementById('background-music');
+      const audioCheckbox = document.getElementById('audio-checkbox');
+      if (audioCheckbox.checked) {
+        music.play();
+      } else {
+        music.pause();
+      }
+    }
+    function closeTab() {
+      window.close();
+    }
+
+    // === Скролл вверх ===
+    window.onscroll = function () {
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("scroll-top").style.display = "block";
+      } else {
+        document.getElementById("scroll-top").style.display = "none";
+      }
+    };
+    function scrollToTop() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
+
+    // === Описания порталов (вместо SOL - ETH) ===
+    const portal1 = `Оценка Portal 1
+Плюсы: Глубокая цветовая палитра, отражение, эффект "входа в бесконечность".
+Минусы: Перегружен стандартными приемами.
+Коллекционная ценность: Высокая.
+Цена: ~0.05-0.1 ETH
+✅ Почему бы приобрел: Один из лучших способов передать концепцию "врат в другую реальность".`;
+
+    const portal2 = `Оценка Portal 2
+Плюсы: Атмосферно, сочетание sci-fi и природы.
+Минусы: Немного отличается от общей темной кибер-тематики.
+Коллекционная ценность: Умеренно высокая.
+Цена: ~0.04-0.08 ETH
+✅ Почему бы приобрел: Выделяется в коллекции, желанный для любителей "жизни внутри цифровых миров".`;
+
+    const portal3 = `Оценка Portal 3
+Плюсы: Загадочность, философский подтекст.
+Минусы: Классический прием.
+Коллекционная ценность: Очень высокая.
+Цена: ~0.09-0.12 ETH
+✅ Почему бы приобрел: Символ исследований параллельных миров, идеален для ценителей sci-fi.`;
+
+    // === Модальное окно с описанием портала ===
+    function openModal(content) {
+      document.getElementById("modal-content").innerText = content;
+      document.getElementById("modal-bg").style.display = "flex";
+      document.getElementById("page-content")?.style?.filter = "blur(5px)";
+    }
+    function closeModal() {
+      document.getElementById("modal-bg").style.display = "none";
+      document.getElementById("page-content")?.style?.filter = "none";
+    }
+
+    // === Анимация появления ===
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
+        }
+      });
+    }, { threshold: 0.2 });
+    document.querySelectorAll('section, figure').forEach(el => {
+      el.classList.add('fade-in');
+      observer.observe(el);
+    });
+
+    // === Кастомное окно MetaMask (показ/скрытие) ===
+    function showMetaMaskPopup() {
+      document.getElementById('metamaskModal').style.display = 'flex';
+    }
+    function hideMetaMaskPopup() {
+      document.getElementById('metamaskModal').style.display = 'none';
+    }
+
+    // === Подключение к MetaMask (настоящее окно) ===
+    async function connectMetaMask() {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          alert("MetaMask connected!");
+          hideMetaMaskPopup();
+        } catch (err) {
+          console.error(err);
+          alert("Connection refused: " + err.message);
+        }
+      } else {
+        alert("MetaMask not found! Please install the extension.");
+      }
+    }
+  </script>
+</body>
+</html>
